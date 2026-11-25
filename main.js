@@ -23,7 +23,8 @@ import { pencilize } from "./js/pencilize.js";
   const story = $(".story"), roster = $(".roster"), pick = $(".pick"), credits = $(".credits");
   const letters = $$(".mega span");
   const tate = $(".tate");
-  const night = $(".night");
+  const night = $(".night"), paper = $(".paper");
+  const HAS_GL = () => document.documentElement.classList.contains("has-gl");
   const wrap = $(".cel-wrap"), cel = $(".cel"), field = $(".field");
   const layers = $$(".l-bg, .l-flat, .l-shade, .l-line, .l-light", cel); // bottom → top
   const sketch = $(".l-sketch"), comp = $(".l-comp"), brush = $(".brush");
@@ -34,7 +35,6 @@ import { pencilize } from "./js/pencilize.js";
   const focus = $(".focus"), fctx = focus.getContext("2d");
   const c1 = $(".c1"), c2 = $(".c2"), c3 = $(".c3"), c4 = $(".c4"), c5 = $(".c5");
   const xsheetN = $(".xsheet-n");
-  const soundBtn = $(".sound");
   const navLinks = $$(".top nav a");
 
   /* -------------------------------------------------------------- layout */
@@ -113,6 +113,7 @@ import { pencilize } from "./js/pencilize.js";
     comp.src = artOf(h);
     comp.alt = `${h.name} from ${h.series}`;
     comp.style.objectPosition = `50% ${h.fy * 100}%`;
+    dispatchEvent(new CustomEvent("koko:accent", { detail: h.accent }));
     if (!RM) comp.animate([{ filter: "brightness(2.2) saturate(0)" }, { filter: "none" }], { duration: 140, easing: "ease-out" });
   }
   let storyFlags = { sketch: true, layers: false, focus: false };
@@ -142,7 +143,10 @@ import { pencilize } from "./js/pencilize.js";
     const lift = eio(seg(p, 0.14, 0.3));
     const celY = y0 * (1 - lift);
     const n = eo(seg(p, 0.1, 0.24));
-    night.style.clipPath = `circle(${n * Math.hypot(vw, vh)}px at 50% ${50 + (celY / vh) * 100}%)`;
+    const nr = n * Math.hypot(vw, vh), ny = 50 + (celY / vh) * 100;
+    night.style.clipPath = `circle(${nr}px at 50% ${ny}%)`;
+    // with the WebGL water behind, punch a matching hole in the paper instead
+    if (HAS_GL()) paper.style.maskImage = paper.style.webkitMaskImage = nr > 1 ? `radial-gradient(circle at 50% ${ny}%, transparent ${nr}px, #000 ${nr + 1}px)` : "";
     field.style.opacity = 1 - seg(p, 0.15, 0.24);
 
     c2.style.opacity = fade(p, 0.13, 0.17, 0.24, 0.28);
@@ -256,6 +260,7 @@ import { pencilize } from "./js/pencilize.js";
     active = i;
     const c = HEROINES[i];
     roster.style.setProperty("--accent", c.accent);
+    if (rosterVisible) dispatchEvent(new CustomEvent("koko:accent", { detail: c.accent }));
     const apply = () => {
       riI.textContent = i + 1;
       riName.textContent = c.name;
@@ -272,8 +277,10 @@ import { pencilize } from "./js/pencilize.js";
     clearTimeout(setActive.t);
     setActive.t = setTimeout(apply, 180);
   }
-  let skew = 0;
+  let skew = 0, rosterVisible = false;
   function renderRoster(rp, vel, inView) {
+    if (inView && !rosterVisible) dispatchEvent(new CustomEvent("koko:accent", { detail: HEROINES[Math.max(0, active)].accent }));
+    rosterVisible = inView;
     const f = clamp((rp - 0.03) / 0.94) * (N - 1);
     const x = vw / 2 - (f * unit + unit / 2);
     skew = lerp(skew, clamp(-vel * 0.006, -9, 9) * M, 0.18);
@@ -306,14 +313,10 @@ import { pencilize } from "./js/pencilize.js";
     if (v === focusVideo) return;
     if (focusVideo) focusVideo.muted = true;
     focusVideo = v;
-    if (v) v.muted = !store.sound;
+    if (v) v.muted = !store.audible;
   }
-  soundBtn.addEventListener("click", () => store.setSound(!store.sound));
   store.on((what) => {
-    if (what !== "sound") return;
-    soundBtn.setAttribute("aria-pressed", String(store.sound));
-    soundBtn.textContent = store.sound ? "Sound on" : "Sound off";
-    if (focusVideo) { focusVideo.muted = !store.sound; if (store.sound) focusVideo.play().catch(() => {}); }
+    if (what === "sound" && focusVideo) focusVideo.muted = !store.audible;
   });
 
   /* ------------------------------------------------------------- credits */

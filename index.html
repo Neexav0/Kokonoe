@@ -13,6 +13,16 @@
   <link rel="stylesheet" href="features.css" />
 </head>
 <body>
+  <div class="loader" aria-hidden="true">
+    <div class="ld-top"></div>
+    <div class="ld-bot"></div>
+    <div class="ld-mid">
+      <svg class="ld-kanji" viewBox="0 0 120 120"><text x="60" y="96" text-anchor="middle">九</text></svg>
+      <p class="ld-count"><span class="ld-d"></span><span class="ld-d"></span><span class="ld-d"></span></p>
+      <span class="ld-bar"><i></i></span>
+      <p class="ld-line">Inking nine heroines</p>
+    </div>
+  </div>
   <a class="skip" href="#roster">Skip to the heroines</a>
 
   <header class="top">
@@ -28,7 +38,6 @@
       <a href="#tiers">Tiers</a>
     </nav>
     <div class="top-btns">
-      <button class="sound" type="button" aria-pressed="false">Sound off</button>
       <button class="menu-btn" type="button" aria-expanded="false" aria-controls="drawer">Chapters</button>
     </div>
   </header>
@@ -142,8 +151,11 @@
       </div>
     </section>
 
+    <div class="marquee" data-dir="ltr" aria-hidden="true"><div class="mq-track"></div></div>
+
     <!-- ============ PENCIL: sketch vs colour ============ -->
     <section class="pencil" id="pencil" aria-labelledby="pencil-h">
+      <span class="watermark" data-parallax="-0.18" aria-hidden="true">原画</span>
       <div class="pencil-grid">
         <div class="pencil-copy">
           <div class="sec-head">
@@ -214,6 +226,7 @@
 
     <!-- ============ PICK: swipe deck ============ -->
     <section class="pick" id="pick" aria-labelledby="pick-h">
+      <span class="watermark" data-parallax="-0.18" aria-hidden="true">推し</span>
       <div class="pick-head">
         <h2 id="pick-h">Keep or pass</h2>
         <p>Drag a card right to keep her in your lineup, left to pass. A quick flick is enough.</p>
@@ -248,19 +261,26 @@
         <p data-reveal>Six rounds, each a close crop of one heroine's eyes from her clip. A right answer is worth 2 points and adds her to your lineup. Zooming out helps, but drops the round to 1 point.</p>
       </div>
       <div class="quiz-card" data-reveal>
-        <div class="qz-top">
-          <p class="qz-round">Round <b>1</b> of 6</p>
-          <p class="qz-score">Score <b class="qz-score-n">0</b></p>
+        <div class="qz-main">
+          <div class="qz-top">
+            <p class="qz-round">Round <b>1</b> of 6</p>
+            <p class="qz-score">Score <b class="qz-score-n">0</b></p>
+          </div>
+          <div class="qz-stage">
+            <div class="qz-zoom"></div>
+            <span class="qz-scan" aria-hidden="true"></span>
+          </div>
+          <div class="qz-answers" role="group" aria-label="Choose who this is"></div>
+          <div class="qz-foot">
+            <button type="button" class="chip-btn light" data-act="hint">Zoom out</button>
+            <button type="button" class="chip-btn light next-btn" data-act="next" hidden>Next round</button>
+          </div>
         </div>
-        <div class="qz-stage">
-          <div class="qz-zoom"></div>
-          <img class="qz-reveal" alt="" />
-          <span class="qz-stamp"></span>
-        </div>
-        <div class="qz-answers" role="group" aria-label="Choose who this is"></div>
-        <div class="qz-foot">
-          <button type="button" class="chip-btn light" data-act="hint">Zoom out</button>
-          <button type="button" class="chip-btn light next-btn" data-act="next" hidden>Next round</button>
+        <div class="qz-flip" aria-live="off">
+          <div class="qz-card3d">
+            <div class="qz-face qz-back" aria-hidden="true"><span>?</span><small>Who is she?</small></div>
+            <div class="qz-face qz-front"><img class="qz-reveal" alt="" /><span class="qz-stamp"></span><p class="qz-name"></p></div>
+          </div>
         </div>
         <div class="qz-result" hidden>
           <p class="qz-result-k" aria-hidden="true">結果</p>
@@ -274,6 +294,7 @@
 
     <!-- ============ TIERS ============ -->
     <section class="tiers" id="tiers" aria-labelledby="tiers-h">
+      <span class="watermark" data-parallax="-0.18" aria-hidden="true">番付</span>
       <div class="sec-head">
         <p class="sec-jp" aria-hidden="true">ランキング</p>
         <h2 id="tiers-h" data-split>Rank the nine</h2>
@@ -291,6 +312,8 @@
       </div>
       <p class="sr tier-live" aria-live="polite"></p>
     </section>
+
+    <div class="marquee alt" data-dir="rtl" aria-hidden="true"><div class="mq-track"></div></div>
 
     <!-- ============ CREDITS ============ -->
     <section class="credits" id="credits" aria-label="Credits">
@@ -322,7 +345,13 @@
     <a href="#top">Back to the first frame</a>
   </footer>
 
+  <script type="module" src="js/loader.js"></script>
+  <script type="module" src="js/bg.js"></script>
   <script type="module" src="main.js"></script>
+  <script type="module" src="js/cursor.js"></script>
+  <script type="module" src="js/tilt.js"></script>
+  <script type="module" src="js/marquee.js"></script>
+  <script type="module" src="js/scramble.js"></script>
   <script type="module" src="js/lineup.js"></script>
   <script type="module" src="js/pencil.js"></script>
   <script type="module" src="js/timing.js"></script>

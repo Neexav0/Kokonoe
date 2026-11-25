@@ -35,7 +35,7 @@ export const HEROINES = [
     words: ["Graceful", "Sharp", "Smiling"],
     known: ["Butterfly-wing haori", "Poison instead of strength", "A smile that hides anger"],
     still: 16.8, turn: [3.8, 9, 11.6, 16.8, 19.4, 22], eyes: [16.8, 0.32, 0.12, 0.5] },
-  { id: "mitsuri", fy: 0.18, name: "Mitsuri Kanroji", jp: "甘露寺蜜璃", series: "Demon Slayer", nick: "Love Hashira", accent: "#ff8fc8",
+  { id: "mitsuri", fy: 0.15, name: "Mitsuri Kanroji", jp: "甘露寺蜜璃", series: "Demon Slayer", nick: "Love Hashira", accent: "#ff8fc8",
     desc: "A warm-hearted, powerful swordswoman who leads with compassion and courage.",
     words: ["Warm", "Strong", "Fearless"],
     known: ["Pink-to-green braids", "A whip-thin Nichirin blade", "Love Breathing"],

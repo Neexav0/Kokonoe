@@ -38,6 +38,7 @@ function setClip(i) {
   current = i;
   const h = HEROINES[i];
   section.style.setProperty("--c", h.accent);
+  if (visible) dispatchEvent(new CustomEvent("koko:accent", { detail: h.accent }));
   [...clips.children].forEach((b, k) => b.setAttribute("aria-pressed", String(k === i)));
   video.src = `${fileOf(h)}#t=${Math.max(0, h.still - 3)}`;
   video.playbackRate = slow ? 0.25 : 1;
@@ -193,6 +194,8 @@ function checkVisible() {
   const v = r.bottom > 0 && r.top < innerHeight && !store.modal;
   if (v === visible) return;
   visible = v;
+  if (v && current >= 0) dispatchEvent(new CustomEvent("koko:accent", { detail: HEROINES[current].accent }));
+  video.muted = !(v && store.audible);
   if (v && !userPaused) video.play().catch(() => {}); else video.pause();
   if (v) moveIndicator(false);
 }
@@ -217,4 +220,7 @@ addEventListener("scroll", watch, { passive: true });
 addEventListener("resize", () => booted && moveIndicator(false));
 setInterval(watch, 700);
 watch();
-store.on((w) => { if (w === "modal") checkVisible(); });
+store.on((w) => {
+  if (w === "modal") checkVisible();
+  if (w === "sound") video.muted = !(visible && store.audible);
+});

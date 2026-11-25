@@ -10,6 +10,8 @@ const stage = section.querySelector(".qz-stage");
 const zoom = section.querySelector(".qz-zoom");
 const reveal = section.querySelector(".qz-reveal");
 const stamp = section.querySelector(".qz-stamp");
+const flip = section.querySelector(".qz-flip");
+const nameTag = section.querySelector(".qz-name");
 const answers = section.querySelector(".qz-answers");
 const roundEl = section.querySelector(".qz-round b");
 const scoreEl = section.querySelector(".qz-score-n");
@@ -40,7 +42,11 @@ function showRound() {
   hinted = false; answered = false;
   roundEl.textContent = String(round + 1);
   stage.style.setProperty("--c", h.accent);
+  flip.style.setProperty("--c", h.accent);
+  dispatchEvent(new CustomEvent("koko:accent", { detail: h.accent }));
   stage.classList.remove("revealed", "right", "wrong");
+  flip.classList.remove("revealed", "right", "wrong");
+  nameTag.textContent = "";
   stamp.textContent = "";
   zoom.style.transition = "none";
   zoom.style.transform = RM ? "none" : "scale(1.5)";
@@ -93,6 +99,8 @@ function answer(o, btn) {
   if (!right) [...answers.children].find((b) => b.textContent.endsWith(h.name))?.classList.add("right");
   hintBtn.disabled = true;
   stage.classList.add("revealed", right ? "right" : "wrong");
+  flip.classList.add("revealed", right ? "right" : "wrong");
+  nameTag.textContent = h.name;
   stamp.textContent = right ? "正解" : "残念";
   stamp.setAttribute("aria-hidden", "true");
   if (right) {
@@ -154,7 +162,7 @@ function setScore(n, animate) {
 
 function burst() {
   if (RM) return;
-  const r = stage.getBoundingClientRect();
+  const r = flip.getBoundingClientRect();
   const c = order[round].accent;
   for (let i = 0; i < 22; i++) {
     const p = document.createElement("i");

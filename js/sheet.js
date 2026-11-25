@@ -117,7 +117,7 @@ function fill(i) {
   art.style.objectPosition = `50% ${h.fy * 100}%`;
   if (art.complete && art.naturalWidth) art.classList.add("ready");
   video.src = `${fileOf(h)}#t=${h.still}`;
-  video.muted = !store.sound;
+  video.muted = !store.audible;
   video.classList.remove("ready");
   video.addEventListener("loadeddata", () => video.classList.add("ready"), { once: true });
   video.play().catch(() => {});
@@ -359,6 +359,6 @@ function onKey(e) {
   }
 }
 
-store.on((what) => { if (what === "sound" && video) video.muted = !store.sound; });
+store.on((what) => { if (what === "sound" && video) video.muted = !store.audible; });
 export const sheetIsOpen = () => isOpen;
 export { byId };

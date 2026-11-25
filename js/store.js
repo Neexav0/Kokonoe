@@ -10,7 +10,8 @@ const state = {
   tiers: saved.tiers || null,
   quizBest: saved.quizBest || 0,
 };
-let sound = false;
+let sound = true; // on by default
+let unlocked = false; // browsers only allow audible playback after a user gesture
 let modal = false;
 const subs = new Set();
 
@@ -39,6 +40,8 @@ export const store = {
   setQuizBest(n) { if (n > state.quizBest) { state.quizBest = n; save(); emit("quiz"); } },
 
   get sound() { return sound; },
+  /* true once sound may actually play */
+  get audible() { return sound && unlocked; },
   setSound(v) { sound = v; emit("sound"); },
 
   get modal() { return modal; },
@@ -46,3 +49,12 @@ export const store = {
 
   on(fn) { subs.add(fn); return () => subs.delete(fn); },
 };
+
+// The first click, tap or key press unlocks audio for the whole page.
+function unlock() {
+  if (unlocked) return;
+  unlocked = true;
+  ["pointerdown", "keydown", "touchstart"].forEach((t) => removeEventListener(t, unlock, true));
+  emit("sound");
+}
+["pointerdown", "keydown", "touchstart"].forEach((t) => addEventListener(t, unlock, true));
