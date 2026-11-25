@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kokonoe · Nine heroines, frame by frame</title>
+  <meta name="description" content="Nine anime heroines, from the first pencil line to the last frame." />
+  <link rel="icon" href="../Anime-Iconic-Faces/favicon.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <a class="skip" href="#roster">Skip to the heroines</a>
+
+  <header class="top">
+    <a class="brand" href="#top" aria-label="Kokonoe, back to top"><span class="brand-kanji" aria-hidden="true">九</span>Kokonoe</a>
+    <nav aria-label="Chapters">
+      <a href="#top" data-jump="0">Sketch</a>
+      <a href="#top" data-jump="0.45">Layers</a>
+      <a href="#roster">The nine</a>
+      <a href="#pick">Keep or pass</a>
+      <a href="#credits">Credits</a>
+    </nav>
+    <button class="sound" type="button" aria-pressed="false">Sound off</button>
+  </header>
+
+  <div class="xsheet" aria-hidden="true"><span class="xsheet-k">コマ</span><span class="xsheet-n">0000</span></div>
+
+  <main id="top">
+    <!-- ============ STORY: one pinned frame ============ -->
+    <section class="story" aria-label="How a frame is made">
+      <div class="stage">
+        <div class="paper"></div>
+        <div class="night"></div>
+        <canvas class="focus" aria-hidden="true"></canvas>
+
+        <h1 class="mega" aria-label="Kokonoe">
+          <span>K</span><span>O</span><span>K</span><span>O</span><span>N</span><span>O</span><span>E</span>
+        </h1>
+        <p class="tate" aria-hidden="true">九重 · 九人のヒロイン</p>
+
+        <div class="sweep sweep-back" aria-hidden="true">NINEFOLD</div>
+
+        <div class="cel-wrap">
+          <svg class="field" viewBox="0 0 1600 900" preserveAspectRatio="none" aria-hidden="true">
+            <g class="draw">
+              <rect x="-40" y="-40" width="1680" height="980" />
+              <path d="M-40 -110 V-80 M1640 -110 V-80 M-40 -95 H1640" />
+              <path d="M-110 -40 H-80 M-110 940 H-80 M-95 -40 V940" />
+              <path d="M760 450 H840 M800 410 V490" />
+              <circle cx="800" cy="450" r="160" />
+              <circle cx="800" cy="450" r="330" />
+              <path d="M-40 60 H-10 M60 -40 V-10 M1640 60 H1610 M1540 -40 V-10 M-40 840 H-10 M60 940 V910 M1640 840 H1610 M1540 940 V910" />
+            </g>
+            <g class="pegs">
+              <rect x="560" y="-84" width="90" height="26" rx="13" />
+              <circle cx="800" cy="-71" r="17" />
+              <rect x="950" y="-84" width="90" height="26" rx="13" />
+            </g>
+            <text x="800" y="-112" text-anchor="middle">1920</text>
+            <text x="-122" y="456" text-anchor="end">1080</text>
+            <text x="1640" y="972" text-anchor="end">Field 12 · cut 001</text>
+          </svg>
+
+          <div class="cel">
+            <canvas class="layer l-bg"></canvas>
+            <canvas class="layer l-flat"></canvas>
+            <canvas class="layer l-shade"></canvas>
+            <canvas class="layer l-line"></canvas>
+            <canvas class="layer l-light"></canvas>
+            <canvas class="layer l-sketch"></canvas>
+            <video class="layer l-comp" src="../Anime-Iconic-Faces/Videos/makima.mp4" muted loop playsinline preload="auto" aria-label="Makima, Chainsaw Man"></video>
+            <i class="brush" aria-hidden="true"></i>
+            <i class="anchor a0"></i><i class="anchor a1"></i><i class="anchor a2"></i><i class="anchor a3"></i><i class="anchor a4"></i>
+          </div>
+        </div>
+
+        <div class="sweep sweep-front" aria-hidden="true">NINEFOLD</div>
+
+        <svg class="leaders" aria-hidden="true"><path /><path /><path /><path /><path /></svg>
+        <ul class="callouts" aria-label="The five passes of a frame">
+          <li data-side="r"><b>Background paint</b><span>Painted once and held under the whole cut.</span></li>
+          <li data-side="l"><b>Color flats</b><span>One color per shape, filled by hand.</span></li>
+          <li data-side="r"><b>Shadow tone</b><span>The second color that gives her a jaw and a collar.</span></li>
+          <li data-side="l"><b>Line art</b><span>The key animator's lines, cleaned up.</span></li>
+          <li data-side="r"><b>Light and bloom</b><span>Added last in compositing, so the eyes catch.</span></li>
+        </ul>
+
+        <div class="copy c1">
+          <p>Nine heroines, from the first pencil line to the last frame.</p>
+          <span class="hint">Scroll to ink her in</span>
+        </div>
+        <h2 class="copy c2">First the pencil.<br />Then the paint.</h2>
+        <h2 class="copy c3">A frame looks flat.<br />It's five layers deep.</h2>
+        <h2 class="copy c4">Five passes. One glance.</h2>
+        <h2 class="copy c5">Meet the nine.</h2>
+      </div>
+    </section>
+
+    <!-- ============ ROSTER: sideways film strip ============ -->
+    <section class="roster" id="roster" aria-label="The nine heroines">
+      <div class="stage roster-stage">
+        <div class="roster-bg" aria-hidden="true"></div>
+        <div class="roster-name" aria-hidden="true"></div>
+        <div class="strip">
+          <div class="track"></div>
+        </div>
+        <div class="roster-info" aria-live="polite">
+          <p class="ri-count"><span class="ri-i">1</span> of 9</p>
+          <h2 class="ri-name"></h2>
+          <p class="ri-series"></p>
+          <p class="ri-desc"></p>
+        </div>
+        <p class="roster-jp" aria-hidden="true"></p>
+      </div>
+    </section>
+
+    <!-- ============ PICK: swipe deck ============ -->
+    <section class="pick" id="pick" aria-labelledby="pick-h">
+      <div class="pick-head">
+        <h2 id="pick-h">Keep or pass</h2>
+        <p>Drag a card right to keep her in your lineup, left to pass. A quick flick is enough.</p>
+      </div>
+      <div class="deck" aria-live="polite"></div>
+      <div class="deck-actions">
+        <button type="button" class="btn ghost" data-act="pass">Pass</button>
+        <button type="button" class="btn solid" data-act="keep">Keep</button>
+      </div>
+      <div class="lineup">
+        <h3>Your lineup</h3>
+        <ol class="lineup-list"></ol>
+        <p class="lineup-empty">Nobody yet. Keep someone and she'll appear here.</p>
+      </div>
+    </section>
+
+    <!-- ============ CREDITS ============ -->
+    <section class="credits" id="credits" aria-label="Credits">
+      <div class="stage credits-stage">
+        <div class="roll">
+          <dl>
+            <dt>Heroines</dt>
+            <dd>Makima</dd><dd>Mikasa Ackerman</dd><dd>Yor Forger</dd><dd>Shinobu Kocho</dd><dd>Mitsuri Kanroji</dd><dd>Marin Kitagawa</dd><dd>Nico Robin</dd><dd>Hinata Hyuga</dd><dd>Kaoruko Waguri</dd>
+            <dt>Series</dt>
+            <dd>Chainsaw Man</dd><dd>Attack on Titan</dd><dd>Spy x Family</dd><dd>Demon Slayer</dd><dd>My Dress-Up Darling</dd><dd>One Piece</dd><dd>Naruto</dd><dd>The Fragrant Flower Blooms with Dignity</dd>
+            <dt>Clips</dt>
+            <dd>From your Iconic Faces collection</dd>
+            <dt>Made with</dt>
+            <dd>No framework</dd><dd>One scroll timeline</dd><dd>A lot of easing curves</dd>
+          </dl>
+        </div>
+        <div class="fin">
+          <span class="fin-k">終</span>
+          <span class="hanko">九重</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>Kokonoe is a fan tribute. Characters belong to their creators and studios.</p>
+    <a href="#top">Back to the first frame</a>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
