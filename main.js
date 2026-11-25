@@ -15,7 +15,14 @@
   const eio = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   const fade = (p, a, b, c, d) => Math.min(seg(p, a, b), 1 - seg(p, c, d));
 
-  const VID = "../Anime-Iconic-Faces/Videos/";
+  const VID = "media/";
+  // Videos sit invisible over a tinted placeholder until they can play,
+  // so a slow or missing clip never shows as a black box.
+  const revealWhenReady = (v) => {
+    const show = () => v.classList.add("ready");
+    if (v.readyState >= 2) show();
+    else { v.addEventListener("loadeddata", show, { once: true }); v.addEventListener("seeked", show, { once: true }); }
+  };
   const HEROINES = [
     { name: "Makima", jp: "マキマ", series: "Chainsaw Man", nick: "Control Devil", accent: "#ff3b5f", file: "makima.mp4",
       desc: "A calm, hypnotic manipulator whose mysterious smile hides terrifying authority." },
@@ -228,9 +235,11 @@
   const frames = HEROINES.map((c, i) => {
     const f = document.createElement("div");
     f.className = "frame";
-    f.innerHTML = `<div class="frame-in" data-n="Cut ${String(i + 1).padStart(2, "0")}"><video muted loop playsinline preload="metadata" src="${VID}${c.file}#t=2" aria-label="${c.name}, ${c.series}"></video></div>`;
+    f.innerHTML = `<div class="frame-in" style="--c:${c.accent}" data-n="Cut ${String(i + 1).padStart(2, "0")}"><span class="ph" aria-hidden="true">${c.jp}</span><video class="vid" muted loop playsinline preload="metadata" src="${VID}${c.file}#t=2" aria-label="${c.name}, ${c.series}"></video></div>`;
     track.appendChild(f);
-    return { el: f, inner: f.firstElementChild, video: f.querySelector("video") };
+    const video = f.querySelector("video");
+    revealWhenReady(video);
+    return { el: f, inner: f.firstElementChild, video };
   });
   let fw = 0, unit = 0, active = -1;
   function measureTrack() {
@@ -332,12 +341,14 @@
     cards = HEROINES.map((c) => {
       const el = document.createElement("div");
       el.className = "card";
-      el.innerHTML = `<video muted loop playsinline preload="metadata" src="${VID}${c.file}#t=3"></video>
+      el.style.setProperty("--c", c.accent);
+      el.innerHTML = `<span class="ph" aria-hidden="true">${c.jp}</span><video class="vid" muted loop playsinline preload="metadata" src="${VID}${c.file}#t=3"></video>
         <span class="stamp keep">推し<small>Keep</small></span>
         <span class="stamp pass">また今度<small>Pass</small></span>
         <div class="card-cap"><b>${c.name}</b><span>${c.series}</span></div>`;
       return { c, el, video: el.querySelector("video"), keep: el.querySelector(".keep"), pass: el.querySelector(".pass"), x: 0, y: 0, vx: 0, vy: 0 };
     });
+    cards.forEach((k) => revealWhenReady(k.video));
     [...cards].reverse().forEach((k) => deck.appendChild(k.el));
     layoutDeck();
     bindTop();
