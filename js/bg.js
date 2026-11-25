@@ -49,7 +49,7 @@ function start() {
 
   // pass 2: night sky, aurora, the ink with a little chromatic split, grain
   const COMP = `precision highp float; varying vec2 vUv;
-    uniform sampler2D uTrail; uniform float uTime; uniform float uAspect; uniform vec3 uAccent; uniform float uScroll; uniform vec2 uRes;
+    uniform sampler2D uTrail; uniform float uTime; uniform float uAspect; uniform vec3 uAccent; uniform float uScroll; uniform vec2 uRes; uniform float uLevel;
     ${NOISE}
     float rand(vec2 c){ return fract(sin(dot(c, vec2(12.9898, 78.233))) * 43758.5453); }
     void main(){
@@ -59,7 +59,7 @@ function start() {
       vec2 p = uv * vec2(uAspect, 1.);
       float a = fbm(p * 1.3 + vec2(uTime * .025, uScroll * .00012));
       float b = fbm(p * 2.4 - vec2(uTime * .02, 0.) + a);
-      col += uAccent * smoothstep(.05, .75, b) * .22;
+      col += uAccent * smoothstep(.05, .75, b) * (.22 + uLevel * .5);
       col += vec3(.24, .42, .9) * smoothstep(.35, .9, a) * .08;
       vec2 off = vec2(.0035, 0.);
       vec3 t = vec3(texture2D(uTrail, uv + off).r, texture2D(uTrail, uv).g, texture2D(uTrail, uv - off).b);
@@ -78,7 +78,7 @@ function start() {
   catch (err) { console.warn("Kokonoe background disabled:", err.message); canvas.remove(); document.documentElement.classList.replace("has-gl", "no-gl"); return; }
   const U = (p, names) => Object.fromEntries(names.map((n) => [n, gl.getUniformLocation(p, n)]));
   const tu = U(trailProg, ["uPrev", "uA", "uB", "uAspect", "uTime", "uColor", "uRadius", "uDecay", "uFlow"]);
-  const cu = U(compProg, ["uTrail", "uTime", "uAspect", "uAccent", "uScroll", "uRes"]);
+  const cu = U(compProg, ["uTrail", "uTime", "uAspect", "uAccent", "uScroll", "uRes", "uLevel"]);
 
   const buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
@@ -123,6 +123,16 @@ function start() {
 
   let scrollY0 = scrollY, scrollVel = 0;
 
+  // crossing into a new section sends a band of ink rising through the water
+  let flood = -1, floodColor = accent;
+  const sectionsAll = () => [...document.querySelectorAll("main > section, main > .marquee")];
+  let sections = sectionsAll(), lastSection = null;
+  function sectionAtCentre() {
+    const mid = innerHeight / 2;
+    for (const el of sections) { const r = el.getBoundingClientRect(); if (r.top <= mid && r.bottom >= mid) return el; }
+    return null;
+  }
+
   /* --------------------------------------------------------------- loop */
   let src = 0, last = performance.now(), t0 = last;
   const paperSections = () => [...document.querySelectorAll(".pencil, .pick, .tiers")];
@@ -133,12 +143,35 @@ function start() {
     return document.documentElement.classList.contains("locked"); // a sheet or dialog covers it
   }
 
+  function trailPass(ax, ay, bx, by, c, radius, decay, flow, time) {
+    const dst = 1 - src;
+    gl.viewport(0, 0, TW, TH);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, targets[dst].fb);
+    gl.useProgram(trailProg);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, targets[src].tex);
+    gl.uniform1i(tu.uPrev, 0);
+    gl.uniform2f(tu.uA, ax, ay);
+    gl.uniform2f(tu.uB, bx, by);
+    gl.uniform1f(tu.uAspect, innerWidth / innerHeight);
+    gl.uniform1f(tu.uTime, time);
+    gl.uniform3f(tu.uColor, c[0], c[1], c[2]);
+    gl.uniform1f(tu.uRadius, radius);
+    gl.uniform1f(tu.uDecay, decay);
+    gl.uniform1f(tu.uFlow, flow);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    src = dst;
+  }
+
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    const sec = sectionAtCentre();
+    if (sec && sec !== lastSection) { if (lastSection && !RM) { flood = 0; } lastSection = sec; }
     const time = RM ? 0 : (now - t0) / 1000;
     for (let i = 0; i < 3; i++) accent[i] += (accentTarget[i] - accent[i]) * Math.min(1, dt * 3);
     scrollVel += ((scrollY - scrollY0) - scrollVel) * 0.2; scrollY0 = scrollY;
 
+    const level = (window.kokoAudio && window.kokoAudio.level) || 0;
     if (!covered()) {
       // idle "ghost brush": keeps the water alive when nobody is moving the mouse
       const idle = now - lastMove > 1800;
@@ -149,28 +182,21 @@ function start() {
       }
       const move = Math.hypot((bx - ax) * innerWidth, (by - ay) * innerHeight);
       speed += (move - speed) * 0.3;
-      const strength = RM ? 0 : Math.min(0.4, (idle ? 0.011 : 0.012) + speed * 0.009) + Math.min(0.25, Math.abs(scrollVel) * 0.004);
+      const strength = RM ? 0 : Math.min(0.4, (idle ? 0.011 + level * 0.05 : 0.012) + speed * 0.009) + Math.min(0.25, Math.abs(scrollVel) * 0.004);
 
-      // trail pass
-      const dst = 1 - src;
-      gl.viewport(0, 0, TW, TH);
-      gl.bindFramebuffer(gl.FRAMEBUFFER, targets[dst].fb);
-      gl.useProgram(trailProg);
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, targets[src].tex);
-      gl.uniform1i(tu.uPrev, 0);
-      gl.uniform2f(tu.uA, ax, ay);
-      gl.uniform2f(tu.uB, bx, by);
-      gl.uniform1f(tu.uAspect, innerWidth / innerHeight);
-      gl.uniform1f(tu.uTime, time);
+      // trail pass: the pointer's brush
       const c = accent.map((v) => (v * 0.85 + 0.15) * strength);
-      gl.uniform3f(tu.uColor, c[0], c[1], c[2]);
-      gl.uniform1f(tu.uRadius, 0.0009 + Math.min(0.004, speed * 0.00004));
-      gl.uniform1f(tu.uDecay, RM ? 0.9 : 0.962);
-      gl.uniform1f(tu.uFlow, RM ? 0 : 0.0016);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-      src = dst;
+      trailPass(ax, ay, bx, by, c, 0.0009 + Math.min(0.004, speed * 0.00004), RM ? 0.9 : 0.962, RM ? 0 : 0.0016, time);
       pmx = bx; pmy = by;
+      // the plume: a wide band rising from the bottom edge over ~0.9s
+      if (flood >= 0) {
+        flood += dt / 0.9;
+        const y = -0.1 + flood * 1.1;
+        const fade = Math.sin(Math.min(1, flood) * Math.PI);
+        const fc = accent.map((v) => (v * 0.9 + 0.1) * 0.05 * fade);
+        trailPass(-0.1, y, 1.1, y + 0.04 * Math.sin(time * 3), fc, 0.006, 1, 0.0016, time);
+        if (flood >= 1) flood = -1;
+      }
 
       // composite
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -183,12 +209,13 @@ function start() {
       gl.uniform3f(cu.uAccent, accent[0], accent[1], accent[2]);
       gl.uniform1f(cu.uScroll, scrollY);
       gl.uniform2f(cu.uRes, W, H);
+      gl.uniform1f(cu.uLevel, level);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  addEventListener("load", () => { papers = paperSections(); });
+  addEventListener("load", () => { papers = paperSections(); sections = sectionsAll(); });
 }
 
 /* Any module can tint the water: dispatchEvent(new CustomEvent("koko:accent", { detail: "#ff3b5f" })) */

@@ -117,6 +117,20 @@ import { pencilize } from "./js/pencilize.js";
     if (!RM) comp.animate([{ filter: "brightness(2.2) saturate(0)" }, { filter: "none" }], { duration: 140, easing: "ease-out" });
   }
   let storyFlags = { sketch: true, layers: false, focus: false };
+
+  // hero: the frame leans toward the mouse, and the pointer is a paintbrush
+  // that shows the colour under the sketch
+  let tmx = 0, tmy = 0, hmx = 0, hmy = 0, brushX = 0, brushY = 0, brushR = 0, overCel = false;
+  const fineMouse = matchMedia("(hover: hover) and (pointer: fine)").matches;
+  if (fineMouse && !RM) {
+    addEventListener("pointermove", (e) => {
+      tmx = (e.clientX / innerWidth) * 2 - 1;
+      tmy = (e.clientY / innerHeight) * 2 - 1;
+      const r = cel.getBoundingClientRect();
+      overCel = e.clientX > r.left && e.clientX < r.right && e.clientY > r.top && e.clientY < r.bottom;
+      if (overCel) { brushX = ((e.clientX - r.left) / r.width) * cel.offsetWidth; brushY = ((e.clientY - r.top) / r.height) * cel.offsetHeight; }
+    }, { passive: true });
+  }
   function renderStory(p) {
     // 1 — title scatters as night falls
     const sc = eio(seg(p, 0.08, 0.22));
@@ -132,7 +146,8 @@ import { pencilize } from "./js/pencilize.js";
 
     // 2 — ink & paint: colour wipes over the blue-pencil sketch
     const w = eio(seg(p, 0.05, 0.19));
-    comp.style.clipPath = `inset(0 ${(1 - w) * 100}% 0 0)`;
+    // before the scroll wipe starts, the brush paints a circle of colour
+    comp.style.clipPath = w < 0.01 && brushR > 1 ? `circle(${brushR.toFixed(1)}px at ${brushX.toFixed(1)}px ${brushY.toFixed(1)}px)` : `inset(0 ${(1 - w) * 100}% 0 0)`;
     brush.style.transform = `translateX(${w * celW}px)`;
     brush.style.opacity = Math.sin(Math.PI * w);
     storyFlags.sketch = w < 1;
@@ -168,7 +183,12 @@ import { pencilize } from "./js/pencilize.js";
     const z = eio(seg(p, 0.74, 0.9));
     const cover = Math.max(vw / celW, vh / celH) * 1.04;
     const scale = lerp(1 - 0.2 * tilt * M, cover, z);
-    wrap.style.transform = `translate3d(0, ${celY}px, 0)`;
+    // mouse tilt, strongest at the top of the page and gone once scrolling takes over
+    const tk = (1 - seg(p, 0.02, 0.14)) * (fineMouse ? 1 : 0) * M;
+    wrap.style.transform = `translate3d(0, ${celY}px, 0) perspective(1600px) rotateX(${(-hmy * 8 * tk).toFixed(2)}deg) rotateY(${(hmx * 11 * tk).toFixed(2)}deg)`;
+    field.style.transform = tk > 0 ? `translateZ(${-70 * tk}px)` : "";
+    wrap.toggleAttribute("data-cursor", tk > 0.5);
+    if (tk > 0.5) { wrap.dataset.cursor = "Paint"; wrap.dataset.cursorStyle = "brush"; }
     cel.style.transform = RM ? `scale(${scale})` : `scale(${scale}) rotateX(${rx}deg) rotateZ(${rz}deg)`;
 
     const gap = celH * 0.36 * ex * M;
@@ -277,22 +297,28 @@ import { pencilize } from "./js/pencilize.js";
     clearTimeout(setActive.t);
     setActive.t = setTimeout(apply, 180);
   }
-  let skew = 0, rosterVisible = false;
+  let skew = 0, rosterVisible = false, glitching = false;
   function renderRoster(rp, vel, inView) {
+    glitching = false;
     if (inView && !rosterVisible) dispatchEvent(new CustomEvent("koko:accent", { detail: HEROINES[Math.max(0, active)].accent }));
     rosterVisible = inView;
     const f = clamp((rp - 0.03) / 0.94) * (N - 1);
     const x = vw / 2 - (f * unit + unit / 2);
     skew = lerp(skew, clamp(-vel * 0.006, -9, 9) * M, 0.18);
+    if (Math.abs(skew) > 0.05) glitching = true; // ease the lean back to zero after scrolling stops
     track.style.transform = `translate3d(${x}px, 0, 0) skewX(${skew}deg)`;
     const a = Math.round(f);
     setActive(a);
     frames.forEach((fr, i) => {
       const d = i - f, ad = Math.abs(d);
-      if (ad > 3) { fr.inner.style.opacity = 0; playIf(fr.video, false); return; }
+      if (ad > 3) { fr.inner.style.opacity = 0; fr.inner.style.filter = ""; playIf(fr.video, false); return; }
       const s = 1 - Math.min(ad, 2) * 0.13;
       fr.inner.style.transform = `rotateY(${clamp(d, -2, 2) * -16 * M}deg) scale(${RM ? 1 : s})`;
       fr.inner.style.opacity = 1 - Math.min(ad, 2.5) * 0.3;
+      // fast scrolling splits the frames into red and cyan copies
+      const g = M * clamp(Math.abs(vel) * 0.0016 - 0.5, 0, 1);
+      if (g > 0.02) glitching = true;
+      fr.inner.style.filter = g > 0.02 ? `drop-shadow(${(g * 7).toFixed(1)}px 0 0 rgba(255,40,90,.8)) drop-shadow(${(-g * 7).toFixed(1)}px 0 0 rgba(40,210,255,.8))` : "";
       playIf(fr.video, inView && i === a && !store.modal);
     });
     rName.style.transform = `translate3d(${vw * 0.04 - (f - a) * vw * 0.25 * M}px, 0, 0)`;
@@ -320,16 +346,51 @@ import { pencilize } from "./js/pencilize.js";
   });
 
   /* ------------------------------------------------------------- credits */
-  const roll = $(".roll"), finK = $(".fin-k"), hanko = $(".hanko");
+  const roll = $(".roll"), hanko = $(".hanko"), finL = $(".fin-l"), finR = $(".fin-r"), fan = $(".fin-fan"), finLine = $(".fin-line");
   let rollH = 0;
+  // every credit line pops in letter by letter as it rolls up into view
+  const credLines = $$(".roll dd").map((dd) => {
+    const text = dd.textContent;
+    dd.setAttribute("aria-label", text);
+    dd.innerHTML = [...text].map((ch, i) => `<span class="cl" style="--i:${i}" aria-hidden="true">${ch === " " ? "&nbsp;" : ch}</span>`).join("");
+    return dd;
+  });
+  // the nine fan out from behind the cracked 終
+  const fanCards = HEROINES.map((h, i) => {
+    const c = document.createElement("span");
+    c.className = "fan-card";
+    c.style.setProperty("--c", h.accent);
+    c.style.zIndex = String(10 - Math.abs(i - 4));
+    c.appendChild(artImg(h));
+    fan.appendChild(c);
+    return c;
+  });
   function renderCredits(cp) {
-    const k = seg(cp, 0, 0.7);
+    const k = seg(cp, 0, 0.56);
     roll.style.transform = `translate3d(0, ${-k * (rollH + vh)}px, 0)`;
-    const r = eo(seg(cp, 0.7, 0.86));
-    finK.style.clipPath = `inset(0 0 ${(1 - r) * 100}% 0)`;
-    const h = seg(cp, 0.88, 0.94);
-    hanko.style.opacity = clamp(h * 3);
+    credLines.forEach((dd) => { if (!dd.classList.contains("in") && dd.getBoundingClientRect().top < vh * 0.9) dd.classList.add("in"); });
+    const r = eo(seg(cp, 0.56, 0.66));
+    const crack = eio(seg(cp, 0.74, 0.88)) * M;
+    const halfOut = (dir) => `translate3d(${dir * crack * 34}vw, ${crack * 3}vh, 0) rotate(${dir * crack * 9}deg)`;
+    finL.style.clipPath = `inset(0 50% ${(1 - r) * 100}% 0)`;
+    finR.style.clipPath = `inset(0 0 ${(1 - r) * 100}% 50%)`;
+    finL.style.transform = halfOut(-1);
+    finR.style.transform = halfOut(1);
+    const fo = RM ? 1 - seg(cp, 0.74, 0.8) : 1 - seg(cp, 0.84, 0.92) * 0.75;
+    finL.style.opacity = finR.style.opacity = fo;
+    const h = seg(cp, 0.66, 0.71);
+    hanko.style.opacity = clamp(h * 3) * (1 - seg(cp, 0.74, 0.8));
     hanko.style.transform = `rotate(-8deg) scale(${RM ? 1 : lerp(1.5, 1, eo(h))})`;
+    const f = eo(seg(cp, 0.76, 0.94));
+    const step = Math.min(vw * 0.085, vh * 0.12);
+    fanCards.forEach((c, i) => {
+      const d = i - 4;
+      c.style.opacity = seg(cp, 0.76, 0.8);
+      c.style.transform = RM ? `translate(-50%, -50%) translateX(${d * step}px)` :
+        `translate(-50%, -50%) translate3d(${(d * f * step).toFixed(1)}px, ${(Math.abs(d) * f * vh * 0.018 + (1 - f) * 30).toFixed(1)}px, 0) rotate(${(d * f * 7).toFixed(2)}deg) scale(${(0.7 + 0.3 * f).toFixed(3)})`;
+    });
+    finLine.style.opacity = seg(cp, 0.9, 0.97);
+    finLine.style.transform = `translateY(${(1 - eo(seg(cp, 0.9, 0.97))) * 16 * M}px)`;
   }
 
   /* ---------------------------------------------------------- swipe deck */
@@ -546,6 +607,12 @@ import { pencilize } from "./js/pencilize.js";
       dirty = false;
     }
 
+    // hero mouse tilt + brush radius ease toward their targets
+    const hk = 1 - Math.exp(-dt * 7);
+    hmx += (tmx - hmx) * hk; hmy += (tmy - hmy) * hk;
+    brushR += ((overCel && y < geo.story.top + geo.story.len * 0.05 ? 120 : 0) - brushR) * (1 - Math.exp(-dt * 10));
+    if (Math.abs(tmx - hmx) > 0.001 || Math.abs(tmy - hmy) > 0.001 || (brushR > 0.5 && brushR < 119.5) || overCel) dirty = true;
+    if (glitching) dirty = true; // keep rendering until the split settles back to none
     const free = !store.modal; // a sheet or dialog owns the screen: hold everything else
     if (cards[0]) playIf(cards[0].video, free && pickInView);
     if (!free) frames.forEach((fr) => playIf(fr.video, false));

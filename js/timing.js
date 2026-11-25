@@ -1,6 +1,7 @@
 // Timing playground: the same clip held on ones, twos or threes.
 import { HEROINES, fileOf, RM, EASE_OUT } from "./data.js";
 import { store } from "./store.js";
+import { duck } from "./audio.js";
 
 const section = document.querySelector(".timing");
 const video = document.createElement("video");
@@ -99,6 +100,7 @@ function setPlaying(on) {
   playBtn.setAttribute("aria-pressed", String(!on));
   playBtn.textContent = on ? "Pause" : "Play";
   backBtn.disabled = fwdBtn.disabled = on;
+  duck("timing", on && visible);
   if (on && visible) video.play().catch(() => {}); else video.pause();
 }
 playBtn.addEventListener("click", () => setPlaying(userPaused));
@@ -196,6 +198,7 @@ function checkVisible() {
   visible = v;
   if (v && current >= 0) dispatchEvent(new CustomEvent("koko:accent", { detail: HEROINES[current].accent }));
   video.muted = !(v && store.audible);
+  duck("timing", v && !userPaused);
   if (v && !userPaused) video.play().catch(() => {}); else video.pause();
   if (v) moveIndicator(false);
 }

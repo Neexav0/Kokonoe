@@ -2,6 +2,7 @@
 import { HEROINES, byId, fileOf, artOf, loadArt, drawCover, RM, clamp, EASE_OUT, EASE_DRAWER, spring } from "./data.js";
 import { store } from "./store.js";
 import { still, cloneCanvas } from "./stills.js";
+import { duck } from "./audio.js";
 
 let root, scroller, media, art, video, nameEl, jpEl, seriesEl, descEl, wordsEl, paletteEl, turnEl, knownEl, idxEl, closeBtn, prevBtn, nextBtn, status;
 let current = -1, origin = null, isOpen = false, busy = false, sampleTimer = 0, lastFocus = null;
@@ -236,6 +237,7 @@ export function openSheet(id, fromEl) {
   origin = fromEl || null;
   lastFocus = document.activeElement;
   store.setModal(true);
+  duck("sheet", true);
   document.documentElement.classList.add("locked");
   root.hidden = false;
   scroller.scrollTop = 0;
@@ -281,6 +283,7 @@ export function close() {
     root.classList.remove("closing", "opening");
     video.pause();
     isOpen = false; busy = false;
+    duck("sheet", false);
     document.documentElement.classList.remove("locked");
     store.setModal(false);
     if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });

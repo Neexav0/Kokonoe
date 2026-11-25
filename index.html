@@ -38,6 +38,7 @@
       <a href="#tiers">Tiers</a>
     </nav>
     <div class="top-btns">
+      <button class="eq" type="button" aria-pressed="false" aria-label="Pause music" title="Music (M)"><i></i><i></i><i></i><i></i></button>
       <button class="menu-btn" type="button" aria-expanded="false" aria-controls="drawer">Chapters</button>
     </div>
   </header>
@@ -60,6 +61,7 @@
     </div>
   </div>
 
+  <p class="sound-hint" aria-hidden="true"><span class="sh-dot"></span>Click anywhere for sound</p>
   <div class="xsheet" aria-hidden="true"><span class="xsheet-k">コマ</span><span class="xsheet-n">0000</span></div>
 
   <main id="top">
@@ -326,6 +328,8 @@
             <dd>Chainsaw Man</dd><dd>Attack on Titan</dd><dd>Spy x Family</dd><dd>Demon Slayer</dd><dd>My Dress-Up Darling</dd><dd>One Piece</dd><dd>Naruto</dd><dd>The Fragrant Flower Blooms with Dignity</dd>
             <dt>Clips</dt>
             <dd>From your Iconic Faces collection</dd>
+            <dt>Music</dt>
+            <dd>“Suzume” by RADWIMPS feat. Toaka</dd>
             <dt>Art</dt>
             <dd>Pinterest pins, credited to their original artists</dd>
             <dt>Made with</dt>
@@ -333,8 +337,11 @@
           </dl>
         </div>
         <div class="fin">
-          <span class="fin-k">終</span>
-          <span class="hanko">九重</span>
+          <div class="fin-fan" aria-hidden="true"></div>
+          <span class="fin-k fin-l" aria-hidden="true">終</span>
+          <span class="fin-k fin-r" aria-label="The end">終</span>
+          <span class="hanko" aria-hidden="true">九重</span>
+          <p class="fin-line">Thank you for watching.</p>
         </div>
       </div>
     </section>
@@ -347,11 +354,14 @@
 
   <script type="module" src="js/loader.js"></script>
   <script type="module" src="js/bg.js"></script>
+  <script type="module" src="js/audio.js"></script>
   <script type="module" src="main.js"></script>
   <script type="module" src="js/cursor.js"></script>
   <script type="module" src="js/tilt.js"></script>
   <script type="module" src="js/marquee.js"></script>
   <script type="module" src="js/scramble.js"></script>
+  <script type="module" src="js/ripple.js"></script>
+  <script type="module" src="js/petals.js"></script>
   <script type="module" src="js/lineup.js"></script>
   <script type="module" src="js/pencil.js"></script>
   <script type="module" src="js/timing.js"></script>

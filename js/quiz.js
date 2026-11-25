@@ -3,6 +3,7 @@ import { HEROINES, byId, artOf, RM, EASE_OUT, EASE_IN_OUT } from "./data.js";
 import { store } from "./store.js";
 import { still, cloneCanvas } from "./stills.js";
 import { toast } from "./toast.js";
+import { rain, sweep } from "./petals.js";
 
 const section = document.querySelector(".quiz");
 const card = section.querySelector(".quiz-card");
@@ -27,6 +28,7 @@ let order = [], round = 0, score = 0, hinted = false, answered = false;
 const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
 function start() {
+  if (round > 0 || score > 0) sweep();
   order = shuffle(HEROINES).slice(0, ROUNDS);
   round = 0; score = 0;
   setScore(0, false);
@@ -110,6 +112,7 @@ function answer(o, btn) {
     live.textContent = `Right, it's ${h.name}. Plus ${pts}.${added ? " She joined your lineup." : ""}`;
     if (added) toast(`${h.name} joined your lineup`, { accent: h.accent });
     burst();
+    rain(h.accent, flip.getBoundingClientRect());
   } else {
     live.textContent = `Not quite. Those were ${h.name}'s eyes.`;
     if (!RM) card.animate([{ transform: "translateX(0)" }, { transform: "translateX(-10px)" }, { transform: "translateX(8px)" }, { transform: "translateX(-5px)" }, { transform: "translateX(0)" }], { duration: 360, easing: "ease-out" });

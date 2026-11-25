@@ -340,7 +340,7 @@ button { font: inherit; color: inherit; }
 .lineup-list:not(:empty) + .lineup-empty { display: none; }
 
 /* ---------- Credits ---------- */
-.credits { height: 340vh; position: relative; background: var(--ink); }
+.credits { height: 480vh; position: relative; background: var(--ink); }
 .credits-stage { color: var(--paper); background: radial-gradient(100% 80% at 50% 50%, #221a52, var(--ink) 70%); }
 .roll { position: absolute; left: 0; right: 0; top: 100%; text-align: center; will-change: transform; }
 .roll dt { font-size: .85rem; font-weight: 500; letter-spacing: .14em; opacity: .55; margin: 3.2rem 0 .8rem; }

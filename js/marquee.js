@@ -42,7 +42,8 @@ function frame(now) {
     const r = s.band.getBoundingClientRect();
     if (r.bottom < -50 || r.top > innerHeight + 50) return;
     s.slow += ((s.hover ? 0.15 : 1) - s.slow) * Math.min(1, dt * 6);
-    const speed = RM ? 0 : (60 + Math.abs(vel) * 18) * dirSign * s.dir * s.slow;
+    const beat = (window.kokoAudio && window.kokoAudio.level) || 0;
+    const speed = RM ? 0 : (60 + beat * 140 + Math.abs(vel) * 18) * dirSign * s.dir * s.slow;
     const w = s.half.offsetWidth || 1;
     s.x = (s.x - speed * dt) % w;
     if (s.x > 0) s.x -= w;
