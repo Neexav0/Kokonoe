@@ -1,48 +1,21 @@
 /* Kokonoe — one scroll timeline, no framework.
    Everything scroll-driven reads from a smoothed scroll value and writes
    transform / opacity / clip-path only. */
+import { HEROINES, byId, VID, RM, clamp, lerp, eo, revealWhenReady, artOf, artImg, loadArt, drawCover } from "./js/data.js";
+import { store } from "./js/store.js";
+import { openSheet } from "./js/sheet.js";
+import { pencilize } from "./js/pencilize.js";
+
 (() => {
   "use strict";
 
-  const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const M = RM ? 0 : 1; // multiplier for movement; opacity changes stay
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
   const seg = (p, a, b) => clamp((p - a) / (b - a));
-  const lerp = (a, b, t) => a + (b - a) * t;
-  const eo = (t) => 1 - Math.pow(1 - t, 3);
   const eio = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   const fade = (p, a, b, c, d) => Math.min(seg(p, a, b), 1 - seg(p, c, d));
 
-  const VID = "media/";
-  // Videos sit invisible over a tinted placeholder until they can play,
-  // so a slow or missing clip never shows as a black box.
-  const revealWhenReady = (v) => {
-    const show = () => v.classList.add("ready");
-    if (v.readyState >= 2) show();
-    else { v.addEventListener("loadeddata", show, { once: true }); v.addEventListener("seeked", show, { once: true }); }
-  };
-  const HEROINES = [
-    { name: "Makima", jp: "マキマ", series: "Chainsaw Man", nick: "Control Devil", accent: "#ff3b5f", file: "makima.mp4",
-      desc: "A calm, hypnotic manipulator whose mysterious smile hides terrifying authority." },
-    { name: "Mikasa Ackerman", jp: "ミカサ・アッカーマン", series: "Attack on Titan", nick: "The strongest soldier", accent: "#d14b4b", file: "mikasa.mp4",
-      desc: "Silent, fiercely loyal, and one of humanity's deadliest warriors." },
-    { name: "Yor Forger", jp: "ヨル・フォージャー", series: "Spy x Family", nick: "Thorn Princess", accent: "#ff4568", file: "yor.mp4",
-      desc: "An elegant assassin who balances extraordinary combat skill with a caring heart." },
-    { name: "Shinobu Kocho", jp: "胡蝶しのぶ", series: "Demon Slayer", nick: "Insect Hashira", accent: "#bd8cff", file: "shinobu.mp4",
-      desc: "Graceful and sharp-witted, her butterfly-like elegance hides formidable skill." },
-    { name: "Mitsuri Kanroji", jp: "甘露寺蜜璃", series: "Demon Slayer", nick: "Love Hashira", accent: "#ff8fc8", file: "mitsuri.mp4",
-      desc: "A warm-hearted, powerful swordswoman who leads with compassion and courage." },
-    { name: "Marin Kitagawa", jp: "喜多川海夢", series: "My Dress-Up Darling", nick: "The cosplay queen", accent: "#ffb05c", file: "marin.mp4",
-      desc: "Cheerful and confident, her love of cosplay and self-expression is impossible to ignore." },
-    { name: "Nico Robin", jp: "ニコ・ロビン", series: "One Piece", nick: "Devil Child", accent: "#9b5cff", file: "robin.mp4",
-      desc: "An elegant archaeologist whose quiet intellect hides immense emotional depth." },
-    { name: "Hinata Hyuga", jp: "日向ヒナタ", series: "Naruto", nick: "Byakugan princess", accent: "#b993ff", file: "hinata.mp4",
-      desc: "Gentle yet courageous, she grows into one of the Hidden Leaf's brightest spirits." },
-    { name: "Kaoruko Waguri", jp: "和栗薫子", series: "The Fragrant Flower Blooms with Dignity", nick: "Golden blossom", accent: "#f2c14e", file: "waguri.mp4",
-      desc: "A graceful presence whose warmth and quiet charm leave a lasting impression." },
-  ];
   const N = HEROINES.length;
   let dirty = true, pickInView = false;
 
@@ -92,13 +65,18 @@
   });
 
   /* ------------------------------------------- cel layer canvases (12fps) */
-  const LCW = 480, LCH = 270;
+  const LCW = 480, LCH = 600;
   [...layers, sketch].forEach((c) => { c.width = LCW; c.height = LCH; });
   const lctx = [...layers, sketch].map((c) => c.getContext("2d"));
+  // The cel holds Makima's art. Its five "passes" are drawn once from the
+  // illustration; the pencil sketch is redrawn on twos with a little line boil.
+  const HERO = byId.makima;
+  let heroArt = null;
+  loadArt(HERO).then((img) => { heroArt = img; drawLayers(true, true); }).catch(() => {});
   function drawLayers(includeSketch, includeLayers) {
-    if (comp.readyState < 2) return;
-    if (includeLayers) for (let i = 0; i < 5; i++) lctx[i].drawImage(comp, 0, 0, LCW, LCH);
-    if (includeSketch) lctx[5].drawImage(comp, 0, 0, LCW, LCH);
+    if (!heroArt) return;
+    if (includeLayers) for (let i = 0; i < 5; i++) drawCover(lctx[i], heroArt, LCW, LCH, HERO.fy);
+    if (includeSketch) pencilize(heroArt, sketch, { fy: HERO.fy, boil: RM ? 0 : 1 });
   }
 
   /* ------------------------------------- focus lines (集中線), on twos */
@@ -124,6 +102,19 @@
   }
 
   /* --------------------------------------------------------------- story */
+  const FLIP = ["mikasa", "yor", "shinobu", "mitsuri", "marin", "robin", "hinata", "waguri", "makima"];
+  HEROINES.forEach((h) => loadArt(h).catch(() => {})); // warm the cache so flips are instant
+  let shownArt = "makima";
+  comp.style.objectPosition = `50% ${byId.makima.fy * 100}%`;
+  function showArt(id) {
+    if (id === shownArt) return;
+    shownArt = id;
+    const h = byId[id];
+    comp.src = artOf(h);
+    comp.alt = `${h.name} from ${h.series}`;
+    comp.style.objectPosition = `50% ${h.fy * 100}%`;
+    if (!RM) comp.animate([{ filter: "brightness(2.2) saturate(0)" }, { filter: "none" }], { duration: 140, easing: "ease-out" });
+  }
   let storyFlags = { sketch: true, layers: false, focus: false };
   function renderStory(p) {
     // 1 — title scatters as night falls
@@ -147,7 +138,7 @@
     sketch.style.visibility = w < 1 ? "visible" : "hidden";
 
     // night spreads from the frame
-    const y0 = vh * (vw <= 760 ? 0.1 : 0.12);
+    const y0 = vh * (vw <= 760 ? 0.02 : 0.12);
     const lift = eio(seg(p, 0.14, 0.3));
     const celY = y0 * (1 - lift);
     const n = eo(seg(p, 0.1, 0.24));
@@ -218,6 +209,10 @@
     sweepB.style.opacity = sOp * 0.95;
     sweepF.style.opacity = sOp;
 
+    // the frame flips through all nine as the word passes, landing on Makima
+    const fi = p < 0.665 ? -1 : Math.min(FLIP.length - 1, Math.floor(seg(p, 0.665, 0.84) * FLIP.length));
+    showArt(fi < 0 ? "makima" : FLIP[fi]);
+
     // 6 — focus lines and the hand-off
     const fo = seg(p, 0.86, 0.94);
     focus.style.opacity = fo * 0.9;
@@ -235,11 +230,18 @@
   const frames = HEROINES.map((c, i) => {
     const f = document.createElement("div");
     f.className = "frame";
-    f.innerHTML = `<div class="frame-in" style="--c:${c.accent}" data-n="Cut ${String(i + 1).padStart(2, "0")}"><span class="ph" aria-hidden="true">${c.jp}</span><video class="vid" muted loop playsinline preload="metadata" src="${VID}${c.file}#t=2" aria-label="${c.name}, ${c.series}"></video></div>`;
+    f.innerHTML = `<div class="frame-in" role="button" tabindex="0" aria-label="Open ${c.name}'s character sheet" style="--c:${c.accent}" data-n="Cut ${String(i + 1).padStart(2, "0")}"><span class="frame-open" aria-hidden="true">Open sheet</span><span class="ph" aria-hidden="true">${c.jp}</span></div>`;
     track.appendChild(f);
-    const video = f.querySelector("video");
-    revealWhenReady(video);
-    return { el: f, inner: f.firstElementChild, video };
+    const inner = f.firstElementChild;
+    const art = artImg(c, "vid");
+    art.alt = `${c.name}, ${c.series}`;
+    inner.appendChild(art);
+    showWhenLoaded(art);
+    const video = null;
+    const open = () => openSheet(c.id, inner);
+    inner.addEventListener("click", open);
+    inner.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+    return { el: f, inner, video };
   });
   let fw = 0, unit = 0, active = -1;
   function measureTrack() {
@@ -269,7 +271,6 @@
     rName.classList.add("swap");
     clearTimeout(setActive.t);
     setActive.t = setTimeout(apply, 180);
-    frames.forEach((fr, k) => { if (Math.abs(k - i) <= 1) fr.video.preload = "auto"; });
   }
   let skew = 0;
   function renderRoster(rp, vel, inView) {
@@ -285,28 +286,34 @@
       const s = 1 - Math.min(ad, 2) * 0.13;
       fr.inner.style.transform = `rotateY(${clamp(d, -2, 2) * -16 * M}deg) scale(${RM ? 1 : s})`;
       fr.inner.style.opacity = 1 - Math.min(ad, 2.5) * 0.3;
-      playIf(fr.video, inView && i === a);
+      playIf(fr.video, inView && i === a && !store.modal);
     });
     rName.style.transform = `translate3d(${vw * 0.04 - (f - a) * vw * 0.25 * M}px, 0, 0)`;
   }
 
   /* -------------------------------------------------------------- videos */
+  function showWhenLoaded(img) {
+    if (img.complete && img.naturalWidth) img.classList.add("ready");
+    else img.addEventListener("load", () => img.classList.add("ready"), { once: true });
+  }
   function playIf(v, on) {
+    if (!v || !v.play) return;
     if (on && v.paused) v.play().catch(() => {});
     else if (!on && !v.paused) v.pause();
   }
-  let soundOn = false, focusVideo = null;
+  let focusVideo = null;
   function setFocusVideo(v) {
     if (v === focusVideo) return;
     if (focusVideo) focusVideo.muted = true;
     focusVideo = v;
-    if (v) v.muted = !soundOn;
+    if (v) v.muted = !store.sound;
   }
-  soundBtn.addEventListener("click", () => {
-    soundOn = !soundOn;
-    soundBtn.setAttribute("aria-pressed", String(soundOn));
-    soundBtn.textContent = soundOn ? "Sound on" : "Sound off";
-    if (focusVideo) { focusVideo.muted = !soundOn; if (soundOn) focusVideo.play().catch(() => {}); }
+  soundBtn.addEventListener("click", () => store.setSound(!store.sound));
+  store.on((what) => {
+    if (what !== "sound") return;
+    soundBtn.setAttribute("aria-pressed", String(store.sound));
+    soundBtn.textContent = store.sound ? "Sound on" : "Sound off";
+    if (focusVideo) { focusVideo.muted = !store.sound; if (store.sound) focusVideo.play().catch(() => {}); }
   });
 
   /* ------------------------------------------------------------- credits */
@@ -323,7 +330,7 @@
   }
 
   /* ---------------------------------------------------------- swipe deck */
-  const deck = $(".deck"), lineupList = $(".lineup-list");
+  const deck = $(".deck");
   const btnPass = $('[data-act="pass"]'), btnKeep = $('[data-act="keep"]');
   const status = document.createElement("p");
   status.className = "sr"; status.setAttribute("aria-live", "polite");
@@ -337,18 +344,20 @@
   let anim = null; // the card currently springing
   function buildDeck() {
     deck.innerHTML = "";
-    lineupList.innerHTML = "";
     cards = HEROINES.map((c) => {
       const el = document.createElement("div");
       el.className = "card";
       el.style.setProperty("--c", c.accent);
-      el.innerHTML = `<span class="ph" aria-hidden="true">${c.jp}</span><video class="vid" muted loop playsinline preload="metadata" src="${VID}${c.file}#t=3"></video>
+      el.innerHTML = `<span class="ph" aria-hidden="true">${c.jp}</span>
         <span class="stamp keep">推し<small>Keep</small></span>
         <span class="stamp pass">また今度<small>Pass</small></span>
         <div class="card-cap"><b>${c.name}</b><span>${c.series}</span></div>`;
-      return { c, el, video: el.querySelector("video"), keep: el.querySelector(".keep"), pass: el.querySelector(".pass"), x: 0, y: 0, vx: 0, vy: 0 };
+      const art = artImg(c, "vid");
+      el.prepend(art);
+      el.querySelector(".ph").after(art);
+      showWhenLoaded(art);
+      return { c, el, video: null, keep: el.querySelector(".keep"), pass: el.querySelector(".pass"), x: 0, y: 0, vx: 0, vy: 0 };
     });
-    cards.forEach((k) => revealWhenReady(k.video));
     [...cards].reverse().forEach((k) => deck.appendChild(k.el));
     layoutDeck();
     bindTop();
@@ -468,12 +477,7 @@
     k.el.remove();
     cards.shift();
     if (cards[0]) cards[0].el.classList.remove("dragging");
-    if (k.dir > 0) {
-      const li = document.createElement("li");
-      li.textContent = k.c.name;
-      li.style.setProperty("--c", k.c.accent);
-      lineupList.appendChild(li);
-    }
+    if (k.dir > 0) store.addLineup(k.c.id, "deck");
     status.textContent = `${k.dir > 0 ? "Kept" : "Passed"} ${k.c.name}.${cards[0] ? ` Next: ${cards[0].c.name}.` : " That's everyone."}`;
     layoutDeck();
     bindTop();
@@ -505,6 +509,7 @@
   /* ---------------------------------------------------------------- loop */
   let target = scrollY, smooth = scrollY, prev = scrollY, last = performance.now(), tickAcc = 0;
   let lastNav = -1;
+  const navTargets = navLinks.map((a) => (a.dataset.jump ? null : document.querySelector(a.getAttribute("href"))));
   addEventListener("scroll", () => { target = scrollY; }, { passive: true });
   addEventListener("resize", () => { measure(); target = smooth = scrollY; });
 
@@ -531,20 +536,23 @@
       renderRoster(rp, rosterIn ? vel : 0, rosterIn);
       if (y > geo.credits.top - vh) renderCredits(cp);
       xsheetN.textContent = String(Math.round((y / docMax) * 2160)).padStart(4, "0");
-      const sec = y < geo.roster.top - vh * 0.5 ? (sp > 0.33 && sp < 0.66 ? 1 : 0) : y < geo.pick.top - vh * 0.5 ? 2 : y < geo.credits.top - vh * 0.5 ? 3 : 4;
+      // which chapter is under the middle of the screen
+      let sec = sp > 0.33 && sp < 0.66 ? 1 : 0;
+      navTargets.forEach((el, i) => { if (el && el.offsetTop <= y + vh * 0.5) sec = i; });
       if (sec !== lastNav) { lastNav = sec; navLinks.forEach((a, i) => a.setAttribute("aria-current", String(i === sec))); }
       dirty = false;
     }
 
-    playIf(comp, storyIn);
-    if (cards[0]) playIf(cards[0].video, pickInView);
-    setFocusVideo(storyIn && sp < 0.98 ? comp : rosterIn ? frames[active]?.video : pickInView ? cards[0]?.video : null);
+    const free = !store.modal; // a sheet or dialog owns the screen: hold everything else
+    if (cards[0]) playIf(cards[0].video, free && pickInView);
+    if (!free) frames.forEach((fr) => playIf(fr.video, false));
+    setFocusVideo(!free ? null : pickInView ? cards[0]?.video : null);
 
     // things animated "on twos": 12 drawings a second, like the real thing
     tickAcc += dt;
     if (tickAcc >= 1 / 12) {
       tickAcc = 0;
-      if (storyIn) drawLayers(storyFlags.sketch, storyFlags.layers);
+      if (storyIn && storyFlags.sketch) drawLayers(true, false);
       if (storyIn && storyFlags.focus) drawFocus();
     }
 
@@ -557,6 +565,5 @@
   measure();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
   addEventListener("load", measure);
-  comp.addEventListener("loadeddata", () => drawLayers(true, true));
   requestAnimationFrame(frame);
 })();

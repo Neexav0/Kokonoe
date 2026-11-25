@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="features.css" />
 </head>
 <body>
   <a class="skip" href="#roster">Skip to the heroines</a>
@@ -20,11 +21,35 @@
       <a href="#top" data-jump="0">Sketch</a>
       <a href="#top" data-jump="0.45">Layers</a>
       <a href="#roster">The nine</a>
-      <a href="#pick">Keep or pass</a>
-      <a href="#credits">Credits</a>
+      <a href="#pencil">Pencil</a>
+      <a href="#timing">Timing</a>
+      <a href="#pick">Keep</a>
+      <a href="#quiz">Quiz</a>
+      <a href="#tiers">Tiers</a>
     </nav>
-    <button class="sound" type="button" aria-pressed="false">Sound off</button>
+    <div class="top-btns">
+      <button class="sound" type="button" aria-pressed="false">Sound off</button>
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="drawer">Chapters</button>
+    </div>
   </header>
+
+  <div class="drawer" id="drawer" hidden>
+    <div class="drawer-overlay"></div>
+    <div class="drawer-panel" role="dialog" aria-modal="true" aria-label="Chapters">
+      <span class="drawer-grip" aria-hidden="true"></span>
+      <p class="drawer-h">Chapters</p>
+      <nav aria-label="Chapters">
+        <a href="#top"><span class="dn">01</span>The first frame</a>
+        <a href="#roster"><span class="dn">02</span>The nine</a>
+        <a href="#pencil"><span class="dn">03</span>Pencil to paint</a>
+        <a href="#timing"><span class="dn">04</span>Ones, twos and threes</a>
+        <a href="#pick"><span class="dn">05</span>Keep or pass</a>
+        <a href="#quiz"><span class="dn">06</span>Whose eyes?</a>
+        <a href="#tiers"><span class="dn">07</span>Rank the nine</a>
+        <a href="#credits"><span class="dn">08</span>Credits</a>
+      </nav>
+    </div>
+  </div>
 
   <div class="xsheet" aria-hidden="true"><span class="xsheet-k">コマ</span><span class="xsheet-n">0000</span></div>
 
@@ -44,24 +69,24 @@
         <div class="sweep sweep-back" aria-hidden="true">NINEFOLD</div>
 
         <div class="cel-wrap">
-          <svg class="field" viewBox="0 0 1600 900" preserveAspectRatio="none" aria-hidden="true">
+          <svg class="field" viewBox="0 0 1200 1500" preserveAspectRatio="none" aria-hidden="true">
             <g class="draw">
-              <rect x="-40" y="-40" width="1680" height="980" />
-              <path d="M-40 -110 V-80 M1640 -110 V-80 M-40 -95 H1640" />
-              <path d="M-110 -40 H-80 M-110 940 H-80 M-95 -40 V940" />
-              <path d="M760 450 H840 M800 410 V490" />
-              <circle cx="800" cy="450" r="160" />
-              <circle cx="800" cy="450" r="330" />
-              <path d="M-40 60 H-10 M60 -40 V-10 M1640 60 H1610 M1540 -40 V-10 M-40 840 H-10 M60 940 V910 M1640 840 H1610 M1540 940 V910" />
+              <rect x="-40" y="-40" width="1280" height="1580" />
+              <path d="M-40 -110 V-80 M1240 -110 V-80 M-40 -95 H1240" />
+              <path d="M-110 -40 H-80 M-110 1540 H-80 M-95 -40 V1540" />
+              <path d="M560 750 H640 M600 710 V790" />
+              <circle cx="600" cy="750" r="220" />
+              <circle cx="600" cy="750" r="470" />
+              <path d="M-40 60 H-10 M60 -40 V-10 M1240 60 H1210 M1140 -40 V-10 M-40 1440 H-10 M60 1540 V1510 M1240 1440 H1210 M1140 1540 V1510" />
             </g>
             <g class="pegs">
-              <rect x="560" y="-84" width="90" height="26" rx="13" />
-              <circle cx="800" cy="-71" r="17" />
-              <rect x="950" y="-84" width="90" height="26" rx="13" />
+              <rect x="390" y="-84" width="90" height="26" rx="13" />
+              <circle cx="600" cy="-71" r="17" />
+              <rect x="720" y="-84" width="90" height="26" rx="13" />
             </g>
-            <text x="800" y="-112" text-anchor="middle">1920</text>
-            <text x="-122" y="456" text-anchor="end">1080</text>
-            <text x="1640" y="972" text-anchor="end">Field 12 · cut 001</text>
+            <text x="600" y="-112" text-anchor="middle">1200</text>
+            <text x="-122" y="756" text-anchor="end">1500</text>
+            <text x="1240" y="1582" text-anchor="end">Field 12 · cut 001</text>
           </svg>
 
           <div class="cel">
@@ -71,7 +96,7 @@
             <canvas class="layer l-line"></canvas>
             <canvas class="layer l-light"></canvas>
             <canvas class="layer l-sketch"></canvas>
-            <video class="layer l-comp" src="media/makima.mp4#t=2" muted loop playsinline preload="auto" aria-label="Makima, Chainsaw Man"></video>
+            <img class="layer l-comp" src="media/art/makima.jpg" alt="Makima from Chainsaw Man" decoding="async" />
             <i class="brush" aria-hidden="true"></i>
             <i class="anchor a0"></i><i class="anchor a1"></i><i class="anchor a2"></i><i class="anchor a3"></i><i class="anchor a4"></i>
           </div>
@@ -117,6 +142,76 @@
       </div>
     </section>
 
+    <!-- ============ PENCIL: sketch vs colour ============ -->
+    <section class="pencil" id="pencil" aria-labelledby="pencil-h">
+      <div class="pencil-grid">
+        <div class="pencil-copy">
+          <div class="sec-head">
+            <p class="sec-jp" aria-hidden="true">原画から仕上げへ</p>
+            <h2 id="pencil-h" data-split>Pencil to paint</h2>
+            <p data-reveal>Every heroine starts as a blue-pencil drawing. Drag the line across her portrait to wipe between the sketch and the finished colour. The pencil lines are redrawn twelve times a second, so they shimmer like hand-drawn animation.</p>
+          </div>
+          <div class="tabs-scroll" data-reveal>
+            <div class="tabs" role="tablist" aria-label="Choose a heroine"></div>
+            <div class="tabs tabs-on" aria-hidden="true"></div>
+          </div>
+          <p class="cmp-caption" data-reveal></p>
+        </div>
+        <figure class="compare-wrap" data-reveal>
+          <div class="compare">
+            <canvas class="cmp-sketch" aria-hidden="true"></canvas>
+            <img class="cmp-color" alt="" draggable="false" />
+            <span class="cmp-label l" aria-hidden="true">Blue-pencil sketch</span>
+            <span class="cmp-label r" aria-hidden="true">Final colour</span>
+            <div class="cmp-handle" role="slider" tabindex="0" aria-label="Divider between sketch and colour" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+              <span class="grip" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="22" height="22"><path d="M9 6l-6 6 6 6M15 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </div>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============ TIMING: ones, twos, threes ============ -->
+    <section class="timing" id="timing" aria-labelledby="timing-h">
+      <div class="sec-head">
+        <p class="sec-jp" aria-hidden="true">コマ打ち</p>
+        <h2 id="timing-h" data-split>On ones, twos and threes</h2>
+        <p data-reveal>Film runs at 24 frames a second, but most anime holds each drawing for two or three of them. Switch the timing and watch the same clip change character.</p>
+      </div>
+      <div class="tm-grid" data-reveal>
+        <div class="tm-main">
+          <div class="tm-stage">
+            <canvas class="tm-canvas" aria-label="The clip, redrawn at the chosen timing"></canvas>
+            <span class="tm-tally" aria-hidden="true"></span>
+            <span class="tm-read">Drawing <b class="tm-n">0</b></span>
+          </div>
+          <div class="tm-strip" aria-hidden="true"><div class="tm-strip-in"></div></div>
+          <div class="tm-controls">
+            <div class="seg" role="radiogroup" aria-label="Timing">
+              <span class="seg-ind" aria-hidden="true"></span>
+              <button type="button" role="radio" data-n="1" aria-checked="false">On ones</button>
+              <button type="button" role="radio" data-n="2" aria-checked="true">On twos</button>
+              <button type="button" role="radio" data-n="3" aria-checked="false">On threes</button>
+            </div>
+            <div class="tm-btns">
+              <button type="button" class="chip-btn light" data-act="back" aria-label="Previous drawing" disabled>Step back</button>
+              <button type="button" class="chip-btn light solid-light" data-act="play" aria-pressed="false">Pause</button>
+              <button type="button" class="chip-btn light" data-act="fwd" aria-label="Next drawing" disabled>Step forward</button>
+              <button type="button" class="chip-btn light" data-act="slow" aria-pressed="false">Slow motion</button>
+            </div>
+          </div>
+          <div class="tm-clips" aria-label="Choose a clip"></div>
+        </div>
+        <aside class="tm-sheet" aria-label="Timesheet">
+          <div class="tm-sheet-head" aria-hidden="true"><span>Frame</span><span>Drawing</span></div>
+          <div class="tm-window" aria-hidden="true"><div class="tm-rows"></div></div>
+          <p class="tm-rate"><span class="tm-rate-n">12</span><span>drawings a second</span></p>
+        </aside>
+      </div>
+    </section>
+
     <!-- ============ PICK: swipe deck ============ -->
     <section class="pick" id="pick" aria-labelledby="pick-h">
       <div class="pick-head">
@@ -129,10 +224,72 @@
         <button type="button" class="btn solid" data-act="keep">Keep</button>
       </div>
       <div class="lineup">
-        <h3>Your lineup</h3>
+        <div class="shared-banner" hidden>
+          <p><b>Someone shared a lineup with you:</b> <span class="sb-names"></span></p>
+          <div class="sb-btns"><button type="button" class="chip-btn solid" data-act="use">Load it</button><button type="button" class="chip-btn" data-act="dismiss">Keep mine</button></div>
+        </div>
+        <div class="lineup-head"><h3>Your lineup</h3><span class="lineup-count"></span></div>
         <ol class="lineup-list"></ol>
-        <p class="lineup-empty">Nobody yet. Keep someone and she'll appear here.</p>
+        <p class="lineup-empty">Nobody yet. Keep someone, or guess her eyes in the quiz, and she'll appear here.</p>
+        <div class="lineup-actions">
+          <button type="button" class="chip-btn solid" data-act="poster">Make a poster</button>
+          <button type="button" class="chip-btn" data-act="link">Copy share link</button>
+          <button type="button" class="chip-btn" data-act="clear">Clear lineup</button>
+        </div>
+        <p class="sr lineup-live" aria-live="polite"></p>
       </div>
+    </section>
+
+    <!-- ============ QUIZ ============ -->
+    <section class="quiz" id="quiz" aria-labelledby="quiz-h">
+      <div class="sec-head">
+        <p class="sec-jp" aria-hidden="true">目で当てて</p>
+        <h2 id="quiz-h" data-split>Whose eyes?</h2>
+        <p data-reveal>Six rounds, each a close crop of one heroine's eyes from her clip. A right answer is worth 2 points and adds her to your lineup. Zooming out helps, but drops the round to 1 point.</p>
+      </div>
+      <div class="quiz-card" data-reveal>
+        <div class="qz-top">
+          <p class="qz-round">Round <b>1</b> of 6</p>
+          <p class="qz-score">Score <b class="qz-score-n">0</b></p>
+        </div>
+        <div class="qz-stage">
+          <div class="qz-zoom"></div>
+          <img class="qz-reveal" alt="" />
+          <span class="qz-stamp"></span>
+        </div>
+        <div class="qz-answers" role="group" aria-label="Choose who this is"></div>
+        <div class="qz-foot">
+          <button type="button" class="chip-btn light" data-act="hint">Zoom out</button>
+          <button type="button" class="chip-btn light next-btn" data-act="next" hidden>Next round</button>
+        </div>
+        <div class="qz-result" hidden>
+          <p class="qz-result-k" aria-hidden="true">結果</p>
+          <p class="qz-result-n"><span class="qz-final">0</span><span class="qz-of">of <span class="qz-max">12</span></span></p>
+          <p class="qz-best"></p>
+          <button type="button" class="chip-btn light next-btn qz-play">Play again</button>
+        </div>
+      </div>
+      <p class="sr qz-live" aria-live="polite"></p>
+    </section>
+
+    <!-- ============ TIERS ============ -->
+    <section class="tiers" id="tiers" aria-labelledby="tiers-h">
+      <div class="sec-head">
+        <p class="sec-jp" aria-hidden="true">ランキング</p>
+        <h2 id="tiers-h" data-split>Rank the nine</h2>
+        <p data-reveal>Drag each heroine into a tier. With a keyboard, focus a card and use the arrow keys. Your list is saved on this device.</p>
+      </div>
+      <div class="tier-board" data-reveal>
+        <div class="tier-row" data-t="S"><span class="tier-tag">S</span><div class="tier-zone" data-zone="S" aria-label="S tier"></div></div>
+        <div class="tier-row" data-t="A"><span class="tier-tag">A</span><div class="tier-zone" data-zone="A" aria-label="A tier"></div></div>
+        <div class="tier-row" data-t="B"><span class="tier-tag">B</span><div class="tier-zone" data-zone="B" aria-label="B tier"></div></div>
+        <div class="tier-pool"><p class="tier-pool-h">Unranked</p><div class="tier-zone" data-zone="pool" aria-label="Unranked"></div></div>
+      </div>
+      <div class="tier-actions" data-reveal>
+        <button type="button" class="chip-btn" data-act="reset">Clear tiers</button>
+        <button type="button" class="chip-btn solid" data-act="export">Save as image</button>
+      </div>
+      <p class="sr tier-live" aria-live="polite"></p>
     </section>
 
     <!-- ============ CREDITS ============ -->
@@ -146,6 +303,8 @@
             <dd>Chainsaw Man</dd><dd>Attack on Titan</dd><dd>Spy x Family</dd><dd>Demon Slayer</dd><dd>My Dress-Up Darling</dd><dd>One Piece</dd><dd>Naruto</dd><dd>The Fragrant Flower Blooms with Dignity</dd>
             <dt>Clips</dt>
             <dd>From your Iconic Faces collection</dd>
+            <dt>Art</dt>
+            <dd>Pinterest pins, credited to their original artists</dd>
             <dt>Made with</dt>
             <dd>No framework</dd><dd>One scroll timeline</dd><dd>A lot of easing curves</dd>
           </dl>
@@ -163,6 +322,13 @@
     <a href="#top">Back to the first frame</a>
   </footer>
 
-  <script src="main.js"></script>
+  <script type="module" src="main.js"></script>
+  <script type="module" src="js/lineup.js"></script>
+  <script type="module" src="js/pencil.js"></script>
+  <script type="module" src="js/timing.js"></script>
+  <script type="module" src="js/tier.js"></script>
+  <script type="module" src="js/quiz.js"></script>
+  <script type="module" src="js/drawer.js"></script>
+  <script type="module">import { watchReveals } from "./js/reveal.js"; watchReveals();</script>
 </body>
 </html>
