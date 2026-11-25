@@ -33,7 +33,7 @@ Built with plain HTML, CSS and JavaScript. No framework, no build step.
 You need Python 3 (for the dev server) and the media files described below.
 
 ```bash
-python kokonoe/serve.py        # serves the kokonoe folder
+python serve.py        # run from the repository root
 # open http://localhost:5181/
 ```
 
@@ -43,10 +43,10 @@ Click or press a key once to start the music (browsers block sound until you int
 
 ### Media (not in the repo)
 
-The clips, art and music are git-ignored (`kokonoe/media/`) because they are large and belong to their creators. To run the site, put them here:
+The clips, art and music are git-ignored (`media/`) because they are large and belong to their creators. To run the site, put them here:
 
 ```
-kokonoe/media/
+media/
 ├── makima.mp4, mikasa.mp4, yor.mp4, shinobu.mp4, mitsuri.mp4,
 │   marin.mp4, robin.mp4, hinata.mp4, waguri.mp4      ← short 16:9 clips
 ├── art/
@@ -55,7 +55,7 @@ kokonoe/media/
     └── suzume.mp3                                     ← background music
 ```
 
-- **Clips:** `python kokonoe/tools/prepare_media.py` copies them from `Anime-Iconic-Faces/Videos/` and moves each MP4's index to the front of the file so it can stream (the originals are not changed).
+- **Clips:** `python tools/prepare_media.py` copies them from an `Anime-Iconic-Faces/Videos/` folder sitting next to this repository (edit `SRC` in the script to point elsewhere) and moves each MP4's index to the front of the file so it can stream (the originals are not changed).
 - **Art:** portrait images named by heroine id. Each heroine's face position (`fy`) and best frames are set in `js/data.js`.
 - **Music:** any MP3 at `media/audio/suzume.mp3`.
 
